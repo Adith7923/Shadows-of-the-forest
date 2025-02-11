@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Lexend:wght@100..900&family=Special+Elite&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik+Mono+One&display=swap');
+
+@font-face {
+    font-family: 'Mystery House';
+    src: url('fonts/Mystery\ House.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: "Crimson Text", serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    background-color: black; /* Ensures a dark background for better readability */
+}
+
+#game-container {
+    height: 100vh;
+    padding: 20px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#scene {
+    display: flex;
+    justify-content: space-between; /* Ensures title is on the left, content is on the right */
+    align-items: center; /* Aligns items vertically */
+    width: 90%;
+    max-width: 1200px;
+}
+
+/* Title Styling */
+#scene-title {
+    font-size: 58px;
+    font-family: "Rubik Mono One", serif;
+    color: white;
+    text-shadow: 12px 12px 18px black;
+    text-align: left;
+    flex: 1;
+}
+
+/* Extra Image */
+#content-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 2;
+    margin-left: 60px;
+    position: relative;
+}
+
+/* Extra Image - Positioned Above Narration */
+#extra-image {
+    width: 290px; /* Adjust size as needed */
+    opacity: 1;
+    margin-bottom: 20px; /* Creates space between image and narration */
+}
+
+/* Narration Styling */
+#narration {
+    font-size: 38px;
+    color: white;
+    text-align: center;
+    text-shadow: 2px 2px 4px black;
+    max-width: 800px;
+    margin-bottom: 20px; /* Adds space between narration and buttons */
+}
+
+/* Buttons Container */
+#button-container {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px; /* Adds space between buttons */
+}
+
+
+/* Buttons */
+.choice-button {
+    font-family: 'Mystery House';
+    display: block;
+    padding: 12px;
+    width: 300px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid white;
+    color: white;
+    cursor: pointer;
+    font-size: 26px;
+    border-radius: 5px;
+    transition: all 0.3s ease-in-out;
+}
+
+.choice-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    color: black;
+    border-color: black;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+    #scene {
+        flex-direction: column;
+        align-items: center;
+    }
+    #scene-title {
+        text-align: center;
+        font-size: 45px;
+    }
+    #content-container {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 600px) {
+    #narration {
+        font-size: 28px;
+        max-width: 90%;
+    }
+    .choice-button {
+        width: 90%;
+        font-size: 22px;
+    }
+}

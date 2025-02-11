@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symbol Puzzle Lock</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #222;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #puzzle-container {
+            display: grid;
+            grid-template-columns: repeat(3, 80px);
+            grid-template-rows: repeat(3, 80px);
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .tile {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 80px;
+            height: 80px;
+            font-size: 24px;
+            background: #444;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .empty {
+            background: transparent;
+            cursor: default;
+        }
+        #exit-button, #skip-button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        #exit-button {
+            display: none;
+            background: green;
+        }
+        #skip-button {
+            background: red;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Solve the Puzzle to Unlock the Door</h2>
+<div id="puzzle-container"></div>
+<button id="exit-button">Continue</button>
+<button id="skip-button">Skip Puzzle</button> <!-- New Button -->
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const container = document.getElementById("puzzle-container");
+    const exitButton = document.getElementById("exit-button");
+    const skipButton = document.getElementById("skip-button"); // New Button
+    const size = 3;
+    let tiles = [];
+
+    // Symbol set instead of numbers
+    const symbols = ["🌧️", "✉️", "🌳", "🪨", "🐻", "👣", "🚪", "🌊", null];
+    let currentState = [];
+
+    function createTiles() {
+        let shuffledSymbols = symbols.slice().sort(() => Math.random() - 0.5);
+        currentState = shuffledSymbols.slice();
+        container.innerHTML = ""; // Clear previous tiles
+        tiles = [];
+
+        shuffledSymbols.forEach((symbol, index) => {
+            const tile = document.createElement("div");
+            tile.classList.add("tile");
+            if (symbol !== null) {
+                tile.innerText = symbol;
+                tile.dataset.index = index;
+            } else {
+                tile.classList.add("empty");
+            }
+            tile.addEventListener("click", () => moveTile(index));
+            tiles.push(tile);
+            container.appendChild(tile);
+        });
+    }
+
+    function moveTile(index) {
+        const emptyIndex = currentState.indexOf(null);
+        if (isValidMove(index, emptyIndex)) {
+            [currentState[index], currentState[emptyIndex]] = [currentState[emptyIndex], currentState[index]];
+            updateTiles();
+            checkWin();
+        }
+    }
+
+    function isValidMove(index, emptyIndex) {
+        const [x1, y1] = [index % size, Math.floor(index / size)];
+        const [x2, y2] = [emptyIndex % size, Math.floor(emptyIndex / size)];
+        return (Math.abs(x1 - x2) === 1 && y1 === y2) || (Math.abs(y1 - y2) === 1 && x1 === x2);
+    }
+
+    function updateTiles() {
+        container.innerHTML = "";
+        currentState.forEach((symbol, index) => {
+            const tile = document.createElement("div");
+            tile.classList.add("tile");
+            if (symbol !== null) {
+                tile.innerText = symbol;
+                tile.dataset.index = index;
+            } else {
+                tile.classList.add("empty");
+            }
+            tile.addEventListener("click", () => moveTile(index));
+            tiles[index] = tile;
+            container.appendChild(tile);
+        });
+    }
+
+    function checkWin() {
+        if (JSON.stringify(currentState) === JSON.stringify(symbols)) {
+            setTimeout(() => {
+                alert("🔓 The door unlocks!");
+                exitButton.style.display = "block";
+            }, 300);
+        }
+    }
+
+    exitButton.addEventListener("click", () => {
+    localStorage.setItem("nextScene", "16"); // Store the next scene
+    window.location.href = "game.html"; // Redirect to game.html
+});
+
+
+    // **Skip Puzzle Button Logic**
+    skipButton.addEventListener("click", () => {
+        currentState = symbols.slice(); // Instantly solve puzzle
+        updateTiles();
+        checkWin(); // Trigger win condition
+    });
+
+    createTiles();
+});
+</script>
+
+</body>
+</html>

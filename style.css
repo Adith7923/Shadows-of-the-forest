@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+
+@font-face {
+    font-family: 'Mystery House';
+    src: url('fonts/Mystery\ House.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+body {
+    font-family: 'Mystery House';
+    margin: 0;
+    padding: 0;
+    background-image: url('images/Gemini_Generated_Image_3phdfh3phdfh3phd.jpg'); 
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; 
+    padding-left: 50px; 
+}
+
+.home-container {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 100%;
+    margin-right: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+#start-button {
+    display: block;
+    padding: 15px 30px;
+    font-size: 44px;
+    font-family: 'Mystery House';
+    color: rgb(255, 255, 255);
+    background: none;
+    border: 2px solid white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#start-button:hover {
+    background-color: white;
+    color: rgb(77, 16, 16);
+}
