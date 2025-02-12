@@ -21,9 +21,14 @@ document.addEventListener("DOMContentLoaded", function () {
     buttonContainer.id = "button-container";
     const glass = document.querySelector(".magnifying-glass");
 
-    document.addEventListener("mousemove", (e) => {
+    narration.addEventListener("mousemove", (e) => {
+        glass.style.display = "block"; 
         glass.style.left = `${e.clientX}px`;
         glass.style.top = `${e.clientY}px`;
+    });
+    
+    narration.addEventListener("mouseleave", () => {
+        glass.style.display = "none"; // Hide when leaving narration
     });
     
     contentContainer.appendChild(extraimage);
@@ -37,12 +42,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let currentSceneAudio = null;
  // Track user interaction
+ const clickSound = new Audio("sounds/stone_move.mp3");  
+
  function openPuzzleModal() {
     const modal = document.getElementById("puzzle-modal");
     modal.style.display = "flex";
+    buttonContainer.innerHTML = ""; // Clear buttons
     createPuzzle(); // Generate puzzle when modal opens
 }
-
+function handleChoice(choice) {
+    if (choice.redirect) {
+        window.location.href = "index.html"; // Redirects to index.html
+    } else {
+        loadScene(choice.nextScene);
+    }
+}
 function closePuzzleModal() {
     document.getElementById("puzzle-modal").style.display = "none";
     loadScene(16); // Load the next scene after solving
@@ -75,6 +89,7 @@ function createPuzzle() {
 function moveTile(index, currentState) {
     const emptyIndex = currentState.indexOf(null);
     if (isValidMove(index, emptyIndex)) {
+        clickSound.play();
         [currentState[index], currentState[emptyIndex]] = [currentState[emptyIndex], currentState[index]];
         updateTiles(currentState);
         checkWin(currentState);
@@ -339,7 +354,7 @@ document.addEventListener("click", function () {
             // Scene 17
             title: "The Broken Bridge",
             text: "Jack approaches a narrow, unstable bridge. A strange puzzle is carved into the wooden planks, requiring a four-digit code to proceed.",
-            background: "river.jpg",
+            background: "river_!.webp",
             extraimage: "bridge_puzzle.jpeg", 
             audio: "sounds/creaking_bridge.mp3",
             input: {
@@ -372,7 +387,7 @@ document.addEventListener("click", function () {
             audio: "sounds/diary_flipping.mp3",
             choices: [
                 { text: "Follow the map and continue the investigation", nextScene: 22 },
-                { text: "Quit and return home after the wolf incident", nextScene: 1}
+                { text: "Quit and return home after the wolf incident", nextScene: 30}
             ]
         },
         
@@ -382,8 +397,7 @@ document.addEventListener("click", function () {
             background: "wolves_attack.webp",
             audio: "sounds/wolf_attack.wav",
             choices: [
-                { text: "Restart from last checkpoint", nextScene: 21 },
-                { text: "Exit the game", nextScene: "gameOver" }
+                { text: "Restart from last checkpoint", nextScene: 18 }   
             ]
         },
         
@@ -418,7 +432,7 @@ document.addEventListener("click", function () {
                 failureMessage: "An alarm triggers! Someone is coming..."
             },
             choices: [
-                { text: "Submit Code", validateInput: true, correctNextScene: 25, wrongNextScene: 1 } // Wrong = Game Over
+                { text: "Submit Code", validateInput: true, correctNextScene: 25} // Wrong = Game Over
             ]
         },
         
@@ -427,7 +441,9 @@ document.addEventListener("click", function () {
             title: "Game Over",
             text: "Jack jumps the fence but is attacked by a guard dog.",
             background: "dog_attack.webp",
-            gameOver: true
+            choices: [
+                { text: "Restart from last checkpoint", nextScene: 22 }   
+            ]
         },
         
         // Scene 25 (Previously Scene 25) - The Basement
@@ -446,7 +462,9 @@ document.addEventListener("click", function () {
             title: "Congratulations!",
             text: "A man in a gray suit appears, revealing this was a test by a detective agency. Jack is hired!",
             background: "agency.webp",
-            ending: true
+            choices: [
+                { text: "Future story", nextScene: 31 },
+            ]
         },
         
         // Scene 27 (Previously Scene 27) - The Truth Exposed or Tragic End
@@ -465,17 +483,83 @@ document.addEventListener("click", function () {
             title: "Silenced",
             text: "Jack is shot before he can expose the truth. The case is buried forever.",
             background: "shot.webp",
-            gameOver: true
+            choices: [
+                { text: "What happened to jack?", nextScene: 34 },
+            ]
         },
         
         // Scene 29 (Previously Scene 29) - Ending 4 (The Truth Lives On)
         {
-            title: "The Detective’s Legacy",
-            text: "Jack exposes the conspiracy but is forced into hiding. His story becomes legend.",
-            background: "mystery_end.webp",
-            ending: true
+            "title": "The Detective’s Legacy",
+            "text": "Jack exposes the conspiracy but is forced into hiding. His story becomes legend.",
+            "background": "hiding.webp",
+            "choices": [
+                { "text": "Live in the shadows, watching over the city", "nextScene": 35 },
+                { "text": "Future awaits", "nextScene": 36 }
+            ]
+        },
+        
+        {   // Scene 30
+            title: "A Bitter Revelation",
+            text: "Jack returns home, shaken by the eerie events in the forest. He convinces himself it was the right choice. But as he sits at his desk, sipping a drink, the news plays on his old TV. His rival detective, Victor Hensley, stands before reporters, shaking hands with top officials. The case was a test—an elaborate setup by a renowned detective agency seeking the best investigator. Jack was one step away from redemption, but he walked away.",
+            background: "rival.jpg",
+            audio: "sounds/newsreportmusic.mp3",
+            choices: [
+                
+                { text: "Restart the case from the beginning", nextScene: 0 }
+            ]
+        },
+        {   // Scene 31 - Jack's Victory
+            title: "Jack's Victory",
+            text: "Years have passed since Jack cracked the mystery. Now a renowned detective, he enjoys a well-earned celebration at a prestigious gala. Journalists surround him, eager for interviews about his legendary cases.",
+            background: "celebration_gala.webp",
+            audio: "sounds/crowd_cheering.mp3",
+            choices: [
+                { text: "Give a speech", nextScene: 32 },
+                { text: "Step away from the spotlight", nextScene: 33 }
+            ]
+        },
+        
+        {   // Scene 32 - The Speech
+            title: "The Speech",
+            text: "Jack steps up to the podium, addressing the crowd. 'Every case is a story waiting to be uncovered. Tonight, I celebrate not just my success, but the pursuit of truth.' The audience erupts in applause.",
+            background: "podium_speech.webp",
+            audio: "sounds/crowd_cheering.mp3",
+            
+        },
+        
+        {   // Scene 33 - Quiet Reflection
+            title: "A Private Moment",
+            text: "Jack slips away from the crowd, finding a quiet balcony. As he gazes at the city lights, he realizes that the thrill of mystery never fades. A new case awaits.",
+            background: "city_night.webp",
+            audio: "sounds/night_wind.mp3",
+            choices: [
+                { text: "Begin a new case", nextScene: 0 }
+            ]
+        },
+        {   // Scene 34 - What Happened to Jack?
+            title: "What Happened to Jack?",
+            text: "The world quickly forgets the detective who got too close to the truth. Newspapers report his 'unfortunate accident,' but those who knew him suspect otherwise. His office remains untouched, a relic of unsolved mysteries.",
+            background: "abandoned_office.webp",
+            
+        },
+        {   // Scene 35 - The Watchful Guardian
+            title: "The Watchful Guardian",
+            text: "Jack disappears into the city, ensuring justice is served from the shadows. His presence is felt but never seen.",
+            background: "shadowy_city.webp",
+        },
+        {   // Scene 36 - The Hidden Message
+            title: "The Detective’s Hall of Fame",
+            text: "Jack’s relentless pursuit of truth earns him a place among history’s greatest detectives. Though he remains hidden, his influence shapes the next generation.",
+            background: "detective_hall.webp",
+            choices: [
+                { "text": "Attend the ceremony", "nextScene": 31 },
+            ]
         }
-
+        
+        
+        
+        
         
     ];
 

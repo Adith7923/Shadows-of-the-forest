@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <button id="page-exit-button">Exit game</button>
+
     <div id="game-container"></div>
     <div class="magnifying-glass"></div>
 
@@ -17,6 +19,13 @@
         <div id="puzzle-container"></div>
         <button id="exit-button">Continue</button>
         <button id="skip-button">Skip Puzzle</button>
+    </div>
+</div>
+<div id="exit-confirmation-modal" class="exit-modal">
+    <div class="exit-modal-content">
+        <p>Are you sure you want to exit? Progress will be lost.</p>
+        <button id="confirm-exit">Yes, Exit</button>
+        <button id="cancel-exit">Cancel</button>
     </div>
 </div>
     <style>
@@ -98,8 +107,102 @@
 #skip-button {
     background: red;
 }
+
+@media (max-width: 1024px) {
+    #puzzle-container {
+        grid-template-columns: repeat(3, 120px);
+        grid-template-rows: repeat(3, 120px);
+        margin: 200px auto 20px;
+        transform: rotateX(-33deg);
+    }
+
+    .tile {
+        width: 130px;
+        height: 130px;
+        font-size: 36px;
+    }
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        width: 100vw;
+        height: 100vh;
+        padding: 0;
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #puzzle-container {
+        grid-template-columns: repeat(3, 130px);
+        grid-template-rows: repeat(3, 130px);
+        margin-top: 50px;
+        transform: rotateX(-33deg);
+    }
+
+    .tile {
+        width: 130px;
+        height: 130px;
+        font-size: 30px;
+    }
+
+    #exit-button, #skip-button {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        width: 100vw;
+        height: 100vh;
+        padding: 0;
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #puzzle-container {
+        grid-template-columns: repeat(3, 130px);
+        grid-template-rows: repeat(3, 130px);
+        margin-top: 100px;
+        transform: rotateX(-20deg);
+    }
+
+    .tile {
+        width: 130px;
+        height: 130px;
+        font-size: 24px;
+    }
+
+    #exit-button, #skip-button {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+}
+
 </style>
 
-    <script src="script.js"></script>
+    <script src="script.js">
+    </script>
+    <script>// Exit Game Modal
+        document.getElementById("page-exit-button").addEventListener("click", function() {
+            document.getElementById("exit-confirmation-modal").style.display = "flex";
+        });
+        
+        document.getElementById("confirm-exit").addEventListener("click", function() {
+            window.location.href = "index.html";
+        });
+        
+        document.getElementById("cancel-exit").addEventListener("click", function() {
+            document.getElementById("exit-confirmation-modal").style.display = "none";
+        });
+        </script>
 </body>
 </html>

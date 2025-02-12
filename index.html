@@ -8,12 +8,32 @@
 </head>
 <body>
     <div class="home-container">
-        <button id="start-button">Go behind the truth</button>
+        <button id="start-button" disabled>
+            <span id="button-text">Find the Truth</span>
+        </button>
+        <img src="images/magnifying_glass.png" alt="Magnifier" class="magnifier-icon" id="magnifier">
     </div>
 
     <script>
-        document.getElementById("start-button").addEventListener("click", () => {
-            window.location.href = "game.html";
+        const magnifier = document.getElementById("magnifier");
+        const button = document.getElementById("start-button");
+        const buttonText = document.getElementById("button-text");
+
+        magnifier.addEventListener("click", () => {
+            magnifier.style.transform = "scale(1.2) translateY(-50px)";
+            magnifier.style.opacity = "0";
+            setTimeout(() => {
+                magnifier.style.display = "none";
+                button.removeAttribute("disabled");
+                button.classList.add("active");
+                buttonText.innerText = "Ready? Click to Begin";
+            }, 500);
+        });
+
+        button.addEventListener("click", () => {
+            if (!button.hasAttribute("disabled")) {
+                window.location.href = "game.html";
+            }
         });
     </script>
 </body>
