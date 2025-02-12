@@ -8,6 +8,98 @@
 </head>
 <body>
     <div id="game-container"></div>
+    <div class="magnifying-glass"></div>
+
+    <!-- Puzzle Modal -->
+<div id="puzzle-modal" class="modal">
+    <div class="modal-content">
+        <h2>Solve the Puzzle to Unlock the Door</h2>
+        <div id="puzzle-container"></div>
+        <button id="exit-button">Continue</button>
+        <button id="skip-button">Skip Puzzle</button>
+    </div>
+</div>
+    <style>
+        @font-face {
+    font-family: 'Damned';
+    src: url('fonts/Damned.ttf') format('truetype');
+}
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+    font-family: 'Damned';
+}
+
+.modal-content {
+    background-image: url("images/stone_door.jpg");
+    padding: 20px;
+    width: 100%;
+    height: 100vh;
+    text-align: center;
+    border-radius: 8px;
+    color: white;
+}
+
+#puzzle-container {
+    display: grid;
+    grid-template-columns: repeat(3, 140px);
+    grid-template-rows: repeat(3, 140px);
+    gap: 5px;
+    margin-top: 240px;
+    margin-bottom: 20px;
+    margin-left: 690px;
+    perspective: 500px; /* Adds depth */
+    transform: rotateX(-33deg); /* Tilts the puzzle slightly upwards */
+    transform-origin: center bottom;
+}
+
+.tile {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 140px;
+    height: 140px;
+    font-size: 40px;
+    background-image: url("images/stone_bg.jpeg");
+    background-size: cover; /* Ensures the image covers the entire tile */
+    background-position: center; /* Centers the image */
+    background-repeat: no-repeat; /* Prevents tiling */
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.empty {
+    background: transparent;
+    cursor: default;
+}
+
+#exit-button, #skip-button {
+    padding: 10px 20px;
+    margin-top: 10px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+#exit-button {
+    display: none;
+    background: green;
+}
+
+#skip-button {
+    background: red;
+}
+</style>
+
     <script src="script.js"></script>
 </body>
 </html>

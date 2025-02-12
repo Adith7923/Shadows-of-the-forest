@@ -3,47 +3,163 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const scene = document.createElement("div");
     scene.id = "scene";
-    
+
     const title = document.createElement("h1");
     title.id = "scene-title";
     const extraimage = document.createElement("img");
     extraimage.id = "extra-image";
     const image = document.createElement("img");
     image.id = "scene-image";
-    
+
     const contentContainer = document.createElement("div");
-    contentContainer.id = "content-container"; 
-    
+    contentContainer.id = "content-container";
+
     const narration = document.createElement("p");
     narration.id = "narration";
-    
+
     const buttonContainer = document.createElement("div");
     buttonContainer.id = "button-container";
+    const glass = document.querySelector(".magnifying-glass");
 
+    document.addEventListener("mousemove", (e) => {
+        glass.style.left = `${e.clientX}px`;
+        glass.style.top = `${e.clientY}px`;
+    });
+    
     contentContainer.appendChild(extraimage);
     contentContainer.appendChild(narration);
     contentContainer.appendChild(buttonContainer);
-    
+
     scene.appendChild(title);
     scene.appendChild(image);
     scene.appendChild(contentContainer);
     gameContainer.appendChild(scene);
 
     let currentSceneAudio = null;
+ // Track user interaction
+ function openPuzzleModal() {
+    const modal = document.getElementById("puzzle-modal");
+    modal.style.display = "flex";
+    createPuzzle(); // Generate puzzle when modal opens
+}
 
-    function playSceneAudio(audioFile) {
-        if (currentSceneAudio) {
-            currentSceneAudio.pause();
-            currentSceneAudio.currentTime = 0;
+function closePuzzleModal() {
+    document.getElementById("puzzle-modal").style.display = "none";
+    loadScene(16); // Load the next scene after solving
+}
+
+document.getElementById("exit-button").addEventListener("click", closePuzzleModal);
+document.getElementById("skip-button").addEventListener("click", closePuzzleModal);
+
+function createPuzzle() {
+    const container = document.getElementById("puzzle-container");
+    container.innerHTML = ""; 
+
+    const symbols = ["🌧️", "✉️", "🌳", "🪨", "🐻", "👣", "🚪", "🌊", null];
+    let currentState = symbols.slice().sort(() => Math.random() - 0.5);
+
+    currentState.forEach((symbol, index) => {
+        const tile = document.createElement("div");
+        tile.classList.add("tile");
+        if (symbol !== null) {
+            tile.innerText = symbol;
+            tile.dataset.index = index;
+        } else {
+            tile.classList.add("empty");
         }
-    
-        if (audioFile) {
-            currentSceneAudio = new Audio(audioFile);
-            currentSceneAudio.loop = true;  
-            currentSceneAudio.volume = 0.6; 
-            currentSceneAudio.play().catch(error => console.error("Audio playback error:", error));
+        tile.addEventListener("click", () => moveTile(index, currentState));
+        container.appendChild(tile);
+    });
+}
+
+function moveTile(index, currentState) {
+    const emptyIndex = currentState.indexOf(null);
+    if (isValidMove(index, emptyIndex)) {
+        [currentState[index], currentState[emptyIndex]] = [currentState[emptyIndex], currentState[index]];
+        updateTiles(currentState);
+        checkWin(currentState);
+    }
+}
+
+function isValidMove(index, emptyIndex) {
+    const size = 3;
+    const [x1, y1] = [index % size, Math.floor(index / size)];
+    const [x2, y2] = [emptyIndex % size, Math.floor(emptyIndex / size)];
+    return (Math.abs(x1 - x2) === 1 && y1 === y2) || (Math.abs(y1 - y2) === 1 && x1 === x2);
+}
+
+function updateTiles(currentState) {
+    const container = document.getElementById("puzzle-container");
+    container.innerHTML = "";
+    currentState.forEach((symbol, index) => {
+        const tile = document.createElement("div");
+        tile.classList.add("tile");
+        if (symbol !== null) {
+            tile.innerText = symbol;
+            tile.dataset.index = index;
+        } else {
+            tile.classList.add("empty");
+        }
+        tile.addEventListener("click", () => moveTile(index, currentState));
+        container.appendChild(tile);
+    });
+}
+
+function checkWin(currentState) {
+    const correctOrder = ["🌧️", "✉️", "🌳", "🪨", "🐻", "👣", "🚪", "🌊", null];
+    if (JSON.stringify(currentState) === JSON.stringify(correctOrder)) {
+        setTimeout(() => {
+            alert("🔓 The door unlocks!");
+            closePuzzleModal();
+        }, 300);
+    }
+}
+
+function playSceneAudio(audioFile) {
+    // Stop and remove previous audio properly
+    if (currentSceneAudio) {
+        currentSceneAudio.pause();
+        currentSceneAudio.currentTime = 0;
+        currentSceneAudio = null; // Clear reference
+    }
+
+    // Create new audio and play if allowed
+    currentSceneAudio = new Audio(audioFile);
+    currentSceneAudio.volume = 0.1;
+
+    if (isAudioUnlocked) {
+        currentSceneAudio.play().catch(error => {
+            console.warn("Audio playback error:", error);
+        });
+    } else {
+        console.warn("Autoplay blocked. Waiting for user interaction.");
+    }
+}
+
+// 🚀 Unlock audio on user interaction
+document.addEventListener("click", function () {
+    if (!isAudioUnlocked) {
+        isAudioUnlocked = true;
+        console.log("User interaction detected. Audio unlocked.");
+
+        // Play pending audio if it exists
+        if (currentSceneAudio) {
+            currentSceneAudio.play().catch(error => console.warn("Audio unlock failed:", error));
         }
     }
+});
+
+
+    // 🔊 Add button click sound effect
+    const buttonClickSound = new Audio("sounds/button.wav"); // Ensure this path is correct
+
+    document.addEventListener("click", function (event) {
+        if (event.target.classList.contains("choice-button")) {
+            buttonClickSound.currentTime = 0; // Reset for quick replay
+            buttonClickSound.play();
+        }
+    });
+
     
     // Scene data
     const scenes = [
@@ -72,7 +188,7 @@ document.addEventListener("DOMContentLoaded", function () {
             title: "A Mysterious Letter",
             text: "Jack walks to the door. In his postbox, a single letter rests inside. No return address. Just his name.",
             background: "postbox.jpg",
-            audio: "sounds/letter_drop.mp3",
+            audio: "sounds/letter_post.mp3",
             choices: [
                 { text: "Open It", nextScene: 5 },
                 { text: "Ignore It", nextScene: 6 }
@@ -93,7 +209,7 @@ document.addEventListener("DOMContentLoaded", function () {
             title: "A Letter Slips Through the Door",
             text: "A soft rustling sound. Jack turns just in time to see an envelope slide under his door.",
             background: "letter_door.jpg",
-            audio: "sounds/paper_slide.mp3",
+            audio: "sounds/letter_post.mp3",
             choices: [
                 { text: "Open It", nextScene: 5 },
                 { text: "Ignore It", nextScene: 6 }
@@ -103,9 +219,9 @@ document.addEventListener("DOMContentLoaded", function () {
         {   //scene 5
             title: "A Cryptic Message",
             text: "Inside, a message scrawled in hurried handwriting: 'A girl is lost. Find her before it's too late.' At the bottom—coordinates to an unknown place.",
-            background: "letter.png",
+            background: "envelope.png",
             extraimage: "paper.png",
-            audio: "sounds/paper_rustle.mp3",
+            audio: "sounds/tear.mp3",
             choices: [
                 { text: "Take It Seriously", nextScene: 7 },
                 { text: "Ignore It", nextScene: 6 }
@@ -123,28 +239,29 @@ document.addEventListener("DOMContentLoaded", function () {
         {   //scene 7
             title: "The Mysterious Coordinates",
             text: "Jack marks the coordinates on the map. Three locations stand out as potential leads.",
-            background: "map.png",
+            background: "map.jpg",
+            extraimage: "map.png",
             audio: "sounds/thinking.mp3",
             choices: [
-                { text: "Forest", nextScene: 11 },
-                { text: "Library", nextScene: 12 },
-                { text: "School", nextScene: 13 }
+                { text: "Forest", nextScene: 8 },
+                { text: "Library", nextScene: 9 },
+                { text: "School", nextScene: 9 }
             ]
         },
         
         {   //scene 8
             title: "Duskwood Forest",
             text: "Jack arrives at Duskwood Forest. The dense trees create an eerie silence. Following the coordinates, he finds a cave hidden behind overgrown vines.",
-            background: "duskwood_forest.png",
-            audio: "sounds/forest_ambience.mp3",
+            background: "duskwood_forest.jpg",
+            audio: "sounds/forest_ambience.wav",
             choices: [
-                { text: "Enter the cave", nextScene: 14 }
+                { text: "Enter the cave", nextScene: 10 }
             ]
         },
         {   //scene 9
             title: "Dead Ends",
             text: "Jack searches the library and school, but finds no useful clues. The coordinates must have meant something else.",
-            background: "empty_library.png", // or "empty_school.png"
+            background: "empty_library.jpg", // or "empty_school.png"
             audio: "sounds/failure.mp3",
             choices: [
                 { text: "Recheck the map", nextScene: 7 } // Goes back to Scene 7
@@ -153,8 +270,8 @@ document.addEventListener("DOMContentLoaded", function () {
         {   //scene 10
             title: "Footstep Trails",
             text: "Jack reaches the cave. He sees trails of boots, small girl footsteps, and animal tracks leading inside. The decision is critical.",
-            background: "cave_entrance.png",
-            audio: "sounds/ominous_wind.mp3",
+            background: "cave_entrance.jpg",
+            audio: "sounds/ominous_wind.wav",
             choices: [
                 { text: "Follow into the cave", nextScene: 11 }
             ]
@@ -162,7 +279,7 @@ document.addEventListener("DOMContentLoaded", function () {
         {   //scene 11
             title: "Into the Darkness",
             text: "Jack steps deeper into the cave. The darkness is suffocating, and the air feels heavy. He can barely see his own hands. Every step echoes off the rocky walls.",
-            background: "cave_dark.png",
+            background: "cave_dark.jpg",
             audio: "sounds/distant_drips.mp3",
             choices: [
                 { text: "Turn on flashlight", nextScene: 12 },
@@ -172,8 +289,8 @@ document.addEventListener("DOMContentLoaded", function () {
         {   //scene 12
             title: "The Junction",
             text: "Jack lights his flashlight, and the cave walls flicker with eerie shadows. As he moves forward, he reaches a junction where three different trails appear on the dusty ground.",
-            background: "cave_junction.png",
-            audio: "sounds/flickering_fire.mp3",
+            background: "cave_junction.jpg",
+            audio: "sounds/flickering_fire.wav",
             choices: [
                 { text: "Follow the smudged footprints", nextScene: 13 },
                 { text: "Follow the girl's footsteps", nextScene: 13 },
@@ -183,7 +300,7 @@ document.addEventListener("DOMContentLoaded", function () {
         {   //scene 13
             title: "The Bear Attack",
             text: "As Jack cautiously walks in the dark, he hears a deep growl. Suddenly, a massive bear lunges at him from the shadows! His heart pounds as the beast snarls, ready to strike.",
-            background: "cave_bear.png",
+            background: "cave_bear.jpg",
             audio: "sounds/bear_roar.mp3",
             choices: [
                 { text: "Use fire to scare the bear and run", nextScene: 12 } 
@@ -192,29 +309,38 @@ document.addEventListener("DOMContentLoaded", function () {
         {   //scene 14
             title: "The Stone Door Puzzle",
             text: "Jack follows the trail of boots deeper into the cave. He arrives at an ancient stone door covered in strange symbols. A puzzle mechanism is embedded in the rock, blocking the way forward.",
-            background: "stone_door.png",
+            background: "stone_puzzle.jpg",
             audio: "sounds/mystery_puzzle.mp3",
             choices: [
                 { text: "Solve the puzzle to open the door", nextScene: 15 }
             ]
         },
         {
+            // Scene 15 - Puzzle Modal Appears Here
+            title: "The Stone Puzzle Mechanism",
+            text: "Jack examines the puzzle carefully. The door won't budge unless he aligns the symbols in the correct order.",
+            background: "puzzle_closeup.jpg",
+            audio: "sounds/puzzle_clicks.mp3",
+            choices: [
+                { text: "Attempt the puzzle", nextScene: 16 } // Opens puzzle modal
+            ]
+        },
+        {
             // Scene 16
             title: "The River Crossing",
             text: "Jack slides down a muddy slope and lands at the riverbank. The water flows swiftly, blocking his path forward. He must decide how to cross.",
-            background: "riverbank.png",
+            background: "riverbank.webp",
             audio: "sounds/river_flow.mp3",
             choices: [
-                { text: "Cross using the bridge", nextScene: 16 },
-                { text: "Cross using the boat", nextScene: 17 }
+                { text: "Cross using the bridge", nextScene: 17 },
             ]
         },
         {
             // Scene 17
             title: "The Broken Bridge",
             text: "Jack approaches a narrow, unstable bridge. A strange puzzle is carved into the wooden planks, requiring a four-digit code to proceed.",
-            background: "bridge.png",
-            extraImage: "bridge_puzzle.png", // Additional image for the puzzle
+            background: "river.jpg",
+            extraimage: "bridge_puzzle.jpeg", 
             audio: "sounds/creaking_bridge.mp3",
             input: {
                 type: "text",
@@ -224,19 +350,133 @@ document.addEventListener("DOMContentLoaded", function () {
                 failureMessage: "The bridge collapses! Jack barely manages to hold onto the edge."
             },
             choices: [
-                { text: "Submit Answer", validateInput: true, correctNextScene: 19, wrongNextScene: 20 }
+                { text: "Submit Answer", validateInput: true, correctNextScene: 18 }
+            ]
+        },  
+        {   // Scene 18 (Previously Scene 19)
+            title: "The Other Side of the River",
+            text: "Jack finally reaches the other side of the river after immense effort. He stumbles upon an abandoned truck with an unlocked carriage. Suddenly, a pack of wolves appears, growling at him.",
+            background: "truck.webp",
+            audio: "sounds/wolves_howling.wav",
+            choices: [
+                { text: "Enter the carriage", nextScene: 19 },
+                { text: "Run away", nextScene: 20 }
             ]
         },
+        
+        {   // Scene 19 (Previously Scene 20)
+            title: "The Mysterious Diary",
+            text: "Inside the truck, Jack finds an old diary along with a map. The diary reveals a 3-digit pin, but the 4th digit has been rubbed off. The map leads to a house from an old school.",
+            background: "diary_map.webp",
+            extraimage:"diary_pin.webp",
+            audio: "sounds/diary_flipping.mp3",
+            choices: [
+                { text: "Follow the map and continue the investigation", nextScene: 22 },
+                { text: "Quit and return home after the wolf incident", nextScene: 1}
+            ]
+        },
+        
+        {   // Scene 20 (Previously Scene 21)
+            title: "The Wolf Attack",
+            text: "Jack stumbles while trying to escape. The wolves catch up to him, and his journey ends here.",
+            background: "wolves_attack.webp",
+            audio: "sounds/wolf_attack.wav",
+            choices: [
+                { text: "Restart from last checkpoint", nextScene: 21 },
+                { text: "Exit the game", nextScene: "gameOver" }
+            ]
+        },
+        
+        {   // Scene 21 (Previously Scene 22)
+            title: "Game Over",
+            text: "Jack falls and is caught by the wolves. His life ends here.",
+            background: "wolves_attack.webp",
+            gameOver: true
+        },
+        
+        // Scene 22 (Previously Scene 22) - The Locked Gate
         {
-            title: "The Boat Crossing",
-            text: "Jack finds an old boat but needs to locate the missing row to proceed.",
-            background: "river.png",
-            extraImage: "boat_puzzle.png", // Image containing the row
-            audio: "sounds/water_ripple.mp3",
-            correctArea: { x: 150, y: 250, width: 50, height: 50 }, // Adjust coordinates based on the image
-            successMessage: "Jack finds the row and can now cross the river!",
-            nextScene: 20
+            title: "The Locked Gate",
+            text: "Jack reaches the house. A fence blocks his way, and the gate is locked.",
+            background: "house_fence.webp",
+            choices: [
+                { text: "Search Nearby", nextScene: 23 },
+                { text: "Jump the Fence", nextScene: 24 } // Game Over
+            ]
+        },
+        
+        // Scene 23 (Previously Scene 23) - Finding the Secret Tunnel
+        {
+            title: "The Secret Tunnel",
+            text: "Jack finds a hidden tunnel behind the house. Inside, he reaches a number lock.",
+            background: "tunnel.webp",
+            input: {
+                type: "text",
+                placeholder: "Enter the 4-digit code",
+                correctAnswer: "9996",
+                successMessage: "The lock clicks open!",
+                failureMessage: "An alarm triggers! Someone is coming..."
+            },
+            choices: [
+                { text: "Submit Code", validateInput: true, correctNextScene: 25, wrongNextScene: 1 } // Wrong = Game Over
+            ]
+        },
+        
+        // Scene 24 (Previously Scene 24) - Game Over (Dog Attack)
+        {
+            title: "Game Over",
+            text: "Jack jumps the fence but is attacked by a guard dog.",
+            background: "dog_attack.webp",
+            gameOver: true
+        },
+        
+        // Scene 25 (Previously Scene 25) - The Basement
+        {
+            title: "The Basement",
+            text: "Jack finds hidden files and realizes the girl was part of a secret experiment.",
+            background: "basement.jpg",
+            choices: [
+                { text: "Investigate further", nextScene: 26 },
+                { text: "Take the files and escape", nextScene: 27 }
+            ]
+        },
+        
+        // Scene 26 (Previously Scene 26) - Ending 2 (Detective Agency Test)
+        {
+            title: "Congratulations!",
+            text: "A man in a gray suit appears, revealing this was a test by a detective agency. Jack is hired!",
+            background: "agency.webp",
+            ending: true
+        },
+        
+        // Scene 27 (Previously Scene 27) - The Truth Exposed or Tragic End
+        {
+            title: "Final Choice",
+            text: "Jack records everything. What will he do next?",
+            background: "decision.webp",
+            choices: [
+                { text: "Expose the truth", nextScene: 28 },
+                { text: "Escape into hiding", nextScene: 29 }
+            ]
+        },
+        
+        // Scene 28 (Previously Scene 28) - Ending 3 (Tragic End)
+        {
+            title: "Silenced",
+            text: "Jack is shot before he can expose the truth. The case is buried forever.",
+            background: "shot.webp",
+            gameOver: true
+        },
+        
+        // Scene 29 (Previously Scene 29) - Ending 4 (The Truth Lives On)
+        {
+            title: "The Detective’s Legacy",
+            text: "Jack exposes the conspiracy but is forced into hiding. His story becomes legend.",
+            background: "mystery_end.webp",
+            ending: true
         }
+
+        
     ];
 
     function loadScene(sceneIndex) {
@@ -260,7 +500,11 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
         extraimage.style.display = "none";
     }
-
+    playSceneAudio(sceneData.audio);
+    if (sceneIndex === 15) {
+        openPuzzleModal(); // Open the puzzle modal
+        return;
+    }
     buttonContainer.innerHTML = "";
 
     // Check if scene has an input field

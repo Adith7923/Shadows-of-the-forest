@@ -11,28 +11,38 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: #222;
+            background-image: url("images/stone_door.jpg");
             color: white;
             font-family: Arial, sans-serif;
         }
         #puzzle-container {
-            display: grid;
-            grid-template-columns: repeat(3, 80px);
-            grid-template-rows: repeat(3, 80px);
-            gap: 5px;
-            margin-bottom: 20px;
-        }
+    display: grid;
+    grid-template-columns: repeat(3, 140px);
+    grid-template-rows: repeat(3, 140px);
+    gap: 5px;
+    margin-top: 140px;
+    margin-bottom: 20px;
+    margin-right: 35px;
+    perspective: 500px; /* Adds depth */
+    transform: rotateX(-35deg); /* Tilts the puzzle slightly upwards */
+    transform-origin: center bottom;
+}
+
         .tile {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 80px;
-            height: 80px;
-            font-size: 24px;
-            background: #444;
-            cursor: pointer;
-            border-radius: 5px;
-        }
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 140px;
+    height: 140px;
+    font-size: 40px;
+    background-image: url("images/stone_bg.jpeg");
+    background-size: cover; /* Ensures the image covers the entire tile */
+    background-position: center; /* Centers the image */
+    background-repeat: no-repeat; /* Prevents tiling */
+    cursor: pointer;
+    border-radius: 5px;
+}
+
         .empty {
             background: transparent;
             cursor: default;
@@ -73,7 +83,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // Symbol set instead of numbers
     const symbols = ["🌧️", "✉️", "🌳", "🪨", "🐻", "👣", "🚪", "🌊", null];
     let currentState = [];
-
+    function playTileClickSound() {
+    const audio = new Audio("sounds/stone_move.mp3"); // Adjust path if needed
+    audio.play();
+}
+function playWinSound() {
+    const audio = new Audio("sounds/win.mp3"); // Adjust path if needed
+    audio.play();
+}
     function createTiles() {
         let shuffledSymbols = symbols.slice().sort(() => Math.random() - 0.5);
         currentState = shuffledSymbols.slice();
@@ -98,6 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function moveTile(index) {
         const emptyIndex = currentState.indexOf(null);
         if (isValidMove(index, emptyIndex)) {
+            playTileClickSound();
             [currentState[index], currentState[emptyIndex]] = [currentState[emptyIndex], currentState[index]];
             updateTiles();
             checkWin();
@@ -130,6 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function checkWin() {
         if (JSON.stringify(currentState) === JSON.stringify(symbols)) {
             setTimeout(() => {
+                playWinSound();
                 alert("🔓 The door unlocks!");
                 exitButton.style.display = "block";
             }, 300);
