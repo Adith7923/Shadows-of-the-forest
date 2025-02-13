@@ -50,13 +50,6 @@ document.addEventListener("DOMContentLoaded", function () {
     buttonContainer.innerHTML = ""; // Clear buttons
     createPuzzle(); // Generate puzzle when modal opens
 }
-function handleChoice(choice) {
-    if (choice.redirect) {
-        window.location.href = "index.html"; // Redirects to index.html
-    } else {
-        loadScene(choice.nextScene);
-    }
-}
 function closePuzzleModal() {
     document.getElementById("puzzle-modal").style.display = "none";
     loadScene(16); // Load the next scene after solving
